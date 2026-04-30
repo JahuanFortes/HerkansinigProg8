@@ -1,0 +1,75 @@
+/* IMPORTANT: make page full height */
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+/* Root app takes full screen */
+.app {
+  height: 100vh; /* FULL SCREEN */
+  display: flex;
+  flex-direction: column;
+  background: #e5e5e5;
+  font-family: Arial;
+}
+
+/* Header */
+.header {
+  background: #1f8a78;
+  color: white;
+  padding: 20px;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+/* Chat area grows automatically */
+.chat {
+  flex: 1; /* 🔥 THIS makes it fill remaining space */
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Messages */
+.msg {
+  max-width: 400px;
+  padding: 10px 14px;
+  border-radius: 12px;
+}
+
+.received {
+  background: #d3d3d3;
+  align-self: flex-start;
+}
+
+.sent {
+  background: #cdebb0;
+  align-self: flex-end;
+}
+
+/* Input bar */
+.input {
+  display: flex;
+  padding: 15px;
+  border-top: 1px solid #ccc;
+  background: #eee;
+}
+
+.input input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 25px;
+  border: 1px solid #ccc;
+}
+
+.input button {
+  margin-left: 10px;
+  padding: 12px 20px;
+  border-radius: 25px;
+  border: none;
+  background: #1f8a78;
+  color: white;
+}
