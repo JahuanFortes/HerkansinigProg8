@@ -22,15 +22,15 @@ https://cdn.jsdelivr.net/npm/dompurify@3.4.11/dist/purify.min.js
     <main>
       <div class="app">
         <div class="header">
-          <div class="container">LLM</div>
-        </div>
-
-        <div class="container chat" id="chat">
-          <div class="msg received">
-            Ask your question clearly. I'll give you accurate, practical answers
-            without sugarcoating. Don't waste time get straight to the point.
+          <div class="container">
+            <h1 class="title">LLM</h1>
+            <button class="clear-button hidden" id="clearButton">
+              Clear Chat
+            </button>
           </div>
         </div>
+
+        <div class="container chat" id="chat"></div>
 
         <form class="form">
           <div class="container">

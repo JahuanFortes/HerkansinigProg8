@@ -1,11 +1,15 @@
 const MESSAGES = [];
 
 const DELAY = 5000;
+const START_DELAY = 1000;
 const RESPONSE_DELAY = 25;
+const START_MESSAGE =
+  "Ask your question clearly. I'll give you accurate, practical answers without sugarcoating. Don't waste time get straight to the point.";
 
 const SUBMIT_BUTTON = document.getElementById("submit");
 const INPUT_FIELD = document.getElementById("inputMessage");
 const CHAT_CONTAINER = document.getElementById("chat");
+const CLEAR_BUTTON = document.getElementById("clearButton");
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -18,6 +22,19 @@ const createMessageElement = (message, type) => {
   messageElement.classList.add("msg", type);
   messageElement.innerHTML = message;
   return messageElement;
+};
+
+const startMessage = () => {
+  const startMessage = createMessageElement("Thinking...", "thinking");
+  SUBMIT_BUTTON.disabled = true;
+  appendMessage(startMessage);
+
+  setTimeout(function () {
+    startMessage.classList.remove("thinking");
+    startMessage.classList.add("received");
+    startMessage.innerHTML = START_MESSAGE;
+    SUBMIT_BUTTON.disabled = false;
+  }, START_DELAY);
 };
 
 const fetchAiResponse = async (messages) => {
@@ -103,6 +120,7 @@ const onSubmit = async (e) => {
   e.preventDefault();
   SUBMIT_BUTTON.disabled = true;
   SUBMIT_BUTTON.textContent = "Sending...";
+  CLEAR_BUTTON.classList.remove("hidden");
 
   handleUserInput();
 
@@ -111,4 +129,17 @@ const onSubmit = async (e) => {
   handleResponseEnd();
 };
 
+const onClear = (e) => {
+  MESSAGES.length = 0;
+  CHAT_CONTAINER.innerHTML = "";
+  CLEAR_BUTTON.classList.add("hidden");
+  startMessage();
+};
+
 SUBMIT_BUTTON.addEventListener("click", onSubmit);
+
+CLEAR_BUTTON.addEventListener("click", onClear);
+
+window.addEventListener("load", () => {
+  startMessage();
+});
