@@ -13,15 +13,22 @@
         <div class="header">LLM</div>
 
         <div class="chat">
-          <div class="msg received" id="msgReceived">bot test</div>
+          <div id="msgSent"></div>
 
-          <div class="msg sent" id="msgSent">Yes</div>
+          <div id="msgRecieved"></div>
         </div>
 
-        <div class="input">
-          <input placeholder="Type a message..." />
-          <button id="submit">klik</button>
-        </div>
+        <form class="input">
+          <label for="inputMessage"></label>
+          <input
+            type="text"
+            placeholder="Type a message..."
+            name="inputMessage"
+            id="inputMessage"
+            required
+          />
+          <button type="submit" id="submit">klik</button>
+        </form>
       </div>
     </main>
   </body>

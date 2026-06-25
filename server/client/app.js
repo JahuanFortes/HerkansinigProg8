@@ -1,26 +1,36 @@
 //#region POST
-const message = "why do hamsters stuff food in their cheeks?";
-
 const submit = document.getElementById("submit");
 
 submit.addEventListener("click", async function (e) {
-  submit.disabeld = true;
+  const input = document.getElementById("inputMessage");
+  const message = input.value.trim();
+  const messageSent = (document.getElementById("msgSent").innerHTML =
+    `<div class="msg sent">${message}</div>`);
+  submit.disabeld = false;
   setTimeout(function () {
-    submit.disabeld = true;
+    submit.disabled = true;
   }, 5000);
+  e.preventDefault();
+
+  const responseAI = await fetch("/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message }),
+  });
+
+  const data = await responseAI.json();
+  document.getElementById("msgRecieved").innerHTML =
+    `<div class="msg received">${data.response}<div>`;
+
+  console.log(data);
 });
 
-const response = await fetch("/chat", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ message }),
-});
+// const result = await responseAI.json();
 
-const result = await response.text();
-document.getElementById("msgRecieved").innerHTML = `<p>${result}</p>`;
+// // const data = await response.json();
+// // console.log(data);
 
-const data = await response.json();
-console.log(data);
+// console.log(result);
 
 //#endregion POST
 
