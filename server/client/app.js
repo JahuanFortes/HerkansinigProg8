@@ -24,16 +24,3 @@ submit.addEventListener("click", async function (e) {
 
   console.log(data);
 });
-
-// const result = await responseAI.json();
-
-// // const data = await response.json();
-// // console.log(data);
-
-// console.log(result);
-
-//#endregion POST
-
-//#region GET
-
-//endregion GET

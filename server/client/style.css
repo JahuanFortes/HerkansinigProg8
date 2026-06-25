@@ -1,31 +1,42 @@
-/* IMPORTANT: make page full height */
+:root {
+  --primary-color: #1f8a78;
+  --secondary-color: #cdebb0;
+  --received-msg-color: #f0f0f0;
+  --sent-msg-color: #cdebb0;
+  --background-color: #e5e5e5;
+  --text-color: #333;
+}
+
 html,
 body {
   height: 100%;
   margin: 0;
 }
 
-/* Root app takes full screen */
 .app {
-  height: 100vh; /* FULL SCREEN */
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #e5e5e5;
+  background: var(--background-color);
   font-family: Arial;
 }
 
-/* Header */
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
 .header {
-  background: #1f8a78;
+  background: var(--primary-color);
   color: white;
   padding: 20px;
   font-weight: bold;
   font-size: 18px;
 }
 
-/* Chat area grows automatically */
 .chat {
-  flex: 1; /* 🔥 THIS makes it fill remaining space */
+  flex: 1;
   padding: 20px;
   overflow-y: auto;
   display: flex;
@@ -33,43 +44,46 @@ body {
   gap: 10px;
 }
 
-/* Messages */
 .msg {
   max-width: 400px;
   padding: 10px 14px;
   border-radius: 12px;
 }
 
-.received {
-  background: #d3d3d3;
+.msg.received {
+  background: var(--received-msg-color);
   align-self: flex-start;
 }
 
-.sent {
-  background: #cdebb0;
+.msg.sent {
+  background: var(--sent-msg-color);
   align-self: flex-end;
 }
 
-/* Input bar */
-.input {
+.form {
   display: flex;
   padding: 15px;
   border-top: 1px solid #ccc;
   background: #eee;
 }
 
-.input input {
+.form .container {
+  display: flex;
+  gap: 10px;
+}
+
+.form .input-field {
   flex: 1;
   padding: 12px;
   border-radius: 25px;
   border: 1px solid #ccc;
 }
 
-.input button {
+.form .submit-button {
   margin-left: 10px;
   padding: 12px 20px;
   border-radius: 25px;
   border: none;
-  background: #1f8a78;
+  background: var(--primary-color);
   color: white;
 }

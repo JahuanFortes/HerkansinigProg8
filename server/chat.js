@@ -1,9 +1,9 @@
-import { AzureChatOpenAI } from "@langchain/openai";
 import {
-  SystemMessage,
-  HumanMessage,
   AIMessage,
+  HumanMessage,
+  SystemMessage,
 } from "@langchain/core/messages";
+import { AzureChatOpenAI } from "@langchain/openai";
 
 new SystemMessage(
   "You are a grumpy but wise assistant. You give short but correct answers.",

@@ -3,31 +3,34 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>LLM Chat</title>
     <script src="app.js" type="module" defer></script>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <main>
       <div class="app">
-        <div class="header">LLM</div>
-
-        <div class="chat">
-          <div id="msgSent"></div>
-
-          <div id="msgRecieved"></div>
+        <div class="header">
+          <div class="container">LLM</div>
         </div>
 
-        <form class="input">
-          <label for="inputMessage"></label>
-          <input
-            type="text"
-            placeholder="Type a message..."
-            name="inputMessage"
-            id="inputMessage"
-            required
-          />
-          <button type="submit" id="submit">klik</button>
+        <div class="container chat" id="chat"></div>
+
+        <form class="form">
+          <div class="container">
+            <label for="inputMessage"></label>
+            <input
+              type="text"
+              placeholder="Type a message..."
+              class="input-field"
+              name="inputMessage"
+              id="inputMessage"
+              required
+            />
+            <button type="submit" id="submit" class="submit-button">
+              Send
+            </button>
+          </div>
         </form>
       </div>
     </main>
