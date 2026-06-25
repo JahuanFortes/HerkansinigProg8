@@ -67,7 +67,19 @@ const model = new AzureChatOpenAI({
   temperature: 0.4,
 });
 
+const userChatHistory = new Map();
+
 export async function callAssistant(message, user) {
+  console.log(userChatHistory);
+
+  if (!userChatHistory.has(user)) {
+    userChatHistory.set(user, []);
+  }
+
+  const messages = userChatHistory.get(user);
+  messages.push({ role: "user", content: message });
+  userChatHistory.set(user, messages);
+
   return await model.stream([
     SYSTEM_MESSAGE,
     ...messages.map((msg) => {
@@ -78,4 +90,14 @@ export async function callAssistant(message, user) {
       }
     }),
   ]);
+}
+
+export async function updateChatHistory(user, assistantMessage) {
+  if (!userChatHistory.has(user)) {
+    userChatHistory.set(user, []);
+  }
+
+  const messages = userChatHistory.get(user);
+  messages.push({ role: "assistant", content: assistantMessage });
+  userChatHistory.set(user, messages);
 }

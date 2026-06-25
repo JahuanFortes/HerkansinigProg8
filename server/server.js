@@ -1,5 +1,5 @@
 import express from "express";
-import { callAssistant } from "./chat.js";
+import { callAssistant, updateChatHistory } from "./chat.js";
 
 const app = express();
 app.use(express.json());
@@ -20,12 +20,16 @@ app.post("/chat", async (req, res) => {
   res.setHeader("Connection", "keep-alive");
 
   try {
+    let assistantMessage = "";
     for await (const chunk of await callAssistant(message, user)) {
       res.write(`data: ${JSON.stringify({ content: chunk.content })}\n\n`);
+      assistantMessage += chunk.content;
     }
 
     res.write("data: [DONE]\n\n");
     res.end();
+
+    await updateChatHistory(user, assistantMessage);
   } catch (error) {
     res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`);
     res.end();
