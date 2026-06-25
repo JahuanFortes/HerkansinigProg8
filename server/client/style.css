@@ -5,6 +5,7 @@
   --sent-msg-color: #cdebb0;
   --background-color: #e5e5e5;
   --text-color: #333;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 *,
@@ -65,11 +66,15 @@ main {
 .msg.received {
   background: var(--received-msg-color);
   align-self: flex-start;
+  border-bottom-left-radius: 0;
+  box-shadow: var(--shadow);
 }
 
 .msg.sent {
   background: var(--sent-msg-color);
   align-self: flex-end;
+  border-bottom-right-radius: 0;
+  box-shadow: var(--shadow);
 }
 
 .msg.error {

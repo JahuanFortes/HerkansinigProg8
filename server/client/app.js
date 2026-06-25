@@ -13,7 +13,7 @@ const appendMessage = (messageElement) => {
 const createMessageElement = (message, type) => {
   const messageElement = document.createElement("div");
   messageElement.classList.add("msg", type);
-  messageElement.textContent = message;
+  messageElement.innerHTML = message;
   return messageElement;
 };
 
@@ -25,6 +25,11 @@ const fetchAiResponse = async (messages) => {
   });
   const data = await response.json();
   return data.response;
+};
+
+const sanitizeAndParseMarkdown = (text) => {
+  const sanitizedText = DOMPurify.sanitize(text);
+  return marked.parse(sanitizedText);
 };
 
 SUBMIT_BUTTON.addEventListener("click", async function (e) {
@@ -46,7 +51,10 @@ SUBMIT_BUTTON.addEventListener("click", async function (e) {
 
   try {
     const responseAI = await fetchAiResponse(MESSAGES);
-    const receivedMessage = createMessageElement(responseAI, "received");
+    const receivedMessage = createMessageElement(
+      sanitizeAndParseMarkdown(responseAI),
+      "received",
+    );
 
     MESSAGES.push({ role: "assistant", content: responseAI });
 
