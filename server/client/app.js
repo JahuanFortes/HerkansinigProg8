@@ -3,8 +3,13 @@ const MESSAGES = [];
 const DELAY = 5000;
 const START_DELAY = 1000;
 const RESPONSE_DELAY = 25;
-const START_MESSAGE =
-  "Ask your question clearly. I'll give you accurate, practical answers without sugarcoating. Don't waste time get straight to the point.";
+const START_MESSAGE = `Hey you.
+
+I'm here. So, what's going on in your head today?
+
+You can talk to me about anything—plans, problems, random thoughts, or even stuff you don't fully understand yet. If it helps, I might ask you a few questions too. Don't worry, I'm not grilling you—just trying to actually understand you properly.
+
+So go on. What are we dealing with?`;
 
 const SUBMIT_BUTTON = document.getElementById("submit");
 const INPUT_FIELD = document.getElementById("inputMessage");
@@ -32,7 +37,7 @@ const startMessage = () => {
   setTimeout(function () {
     startMessage.classList.remove("thinking");
     startMessage.classList.add("received");
-    startMessage.innerHTML = START_MESSAGE;
+    startMessage.innerHTML = sanitizeAndParseMarkdown(START_MESSAGE);
     SUBMIT_BUTTON.disabled = false;
   }, START_DELAY);
 };

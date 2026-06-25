@@ -7,6 +7,7 @@
   --text-color: #333;
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   --thinking-shadow: rgba(0, 119, 26, 0.233);
+  --received-avatar: url("./persona.jpg");
 }
 
 *,
@@ -84,10 +85,17 @@ main {
   overflow-wrap: anywhere;
 }
 
+.msg.received,
+.msg.thinking {
+  align-self: flex-start;
+  max-width: min(400px, calc(100% - 84px));
+  margin-left: 44px;
+  border-bottom-left-radius: 0;
+  position: relative;
+}
+
 .msg.received {
   background: var(--received-msg-color);
-  align-self: flex-start;
-  border-bottom-left-radius: 0;
   box-shadow: var(--shadow);
 }
 
@@ -105,12 +113,25 @@ main {
   text-align: center;
 }
 
+.msg.received::after,
+.msg.thinking::after {
+  content: "";
+  position: absolute;
+  left: -54px;
+  bottom: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--received-avatar);
+  background-size: cover;
+  background-position: center;
+  box-shadow: var(--shadow);
+}
+
 .msg.thinking {
   background: var(--received-msg-color);
-  align-self: flex-start;
   font-style: italic;
   color: #666;
-  border-bottom-left-radius: 0;
   animation: input-pulse 2s ease-in-out infinite;
 }
 
