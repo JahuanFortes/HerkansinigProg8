@@ -79,6 +79,13 @@ main {
   text-align: center;
 }
 
+.msg.thinking {
+  background: var(--received-msg-color);
+  align-self: flex-start;
+  font-style: italic;
+  color: #666;
+}
+
 .form {
   display: flex;
   padding: 15px;

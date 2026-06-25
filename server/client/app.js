@@ -37,10 +37,14 @@ SUBMIT_BUTTON.addEventListener("click", async function (e) {
 
   INPUT_FIELD.value = "";
 
+  const thinkingMessage = createMessageElement("Thinking...", "thinking");
+  appendMessage(thinkingMessage);
+
   try {
     const responseAI = await fetchAiResponse(userMessage);
     const receivedMessage = createMessageElement(responseAI, "received");
 
+    CHAT_CONTAINER.removeChild(thinkingMessage);
     appendMessage(receivedMessage);
   } catch (error) {
     const errorMessage = createMessageElement(
@@ -48,12 +52,14 @@ SUBMIT_BUTTON.addEventListener("click", async function (e) {
       "error",
     );
 
+    CHAT_CONTAINER.removeChild(thinkingMessage);
     appendMessage(errorMessage);
   }
 
-  SUBMIT_BUTTON.textContent = "Send";
+  SUBMIT_BUTTON.textContent = "Cooldown...";
 
   setTimeout(function () {
     SUBMIT_BUTTON.disabled = false;
+    SUBMIT_BUTTON.textContent = "Send";
   }, DELAY);
 });
