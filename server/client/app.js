@@ -51,8 +51,9 @@ SUBMIT_BUTTON.addEventListener("click", async function (e) {
     appendMessage(errorMessage);
   }
 
+  SUBMIT_BUTTON.textContent = "Send";
+
   setTimeout(function () {
     SUBMIT_BUTTON.disabled = false;
-    SUBMIT_BUTTON.textContent = "Send";
   }, DELAY);
 });
