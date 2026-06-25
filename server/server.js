@@ -13,14 +13,14 @@ app.get("/", (req, res) => {
 
 //#region POST
 app.post("/chat", async (req, res) => {
-  const { messages } = req.body;
+  const { message, user } = req.body;
 
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
 
   try {
-    for await (const chunk of await callAssistant(messages)) {
+    for await (const chunk of await callAssistant(message, user)) {
       res.write(`data: ${JSON.stringify({ content: chunk.content })}\n\n`);
     }
 

@@ -1,4 +1,4 @@
-const MESSAGES = [];
+let USER_ID = null;
 
 const DELAY = 5000;
 const START_DELAY = 1000;
@@ -18,6 +18,16 @@ const CLEAR_BUTTON = document.getElementById("clearButton");
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const randomString = (length = 16) => {
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};
+
 const appendMessage = (messageElement) => {
   CHAT_CONTAINER.appendChild(messageElement);
 };
@@ -33,6 +43,7 @@ const startMessage = () => {
   const startMessage = createMessageElement("Thinking...", "thinking");
   SUBMIT_BUTTON.disabled = true;
   appendMessage(startMessage);
+  USER_ID = randomString(16);
 
   setTimeout(function () {
     startMessage.classList.remove("thinking");
@@ -42,11 +53,11 @@ const startMessage = () => {
   }, START_DELAY);
 };
 
-const fetchAiResponse = async (messages) => {
+const fetchAiResponse = async (message, user) => {
   const response = await fetch("/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ messages }),
+    body: JSON.stringify({ message, user }),
   });
   return response.body.getReader();
 };
@@ -62,9 +73,9 @@ const handleUserInput = () => {
   const sentMessage = createMessageElement(userMessage, "sent");
   appendMessage(sentMessage);
 
-  MESSAGES.push({ role: "user", content: userMessage });
-
   INPUT_FIELD.value = "";
+
+  return userMessage;
 };
 
 const handleResponseEnd = () => {
@@ -75,12 +86,12 @@ const handleResponseEnd = () => {
   }, DELAY);
 };
 
-const handleAiResponse = async (messages) => {
+const handleAiResponse = async (message) => {
   const responseMessage = createMessageElement("Thinking...", "thinking");
   appendMessage(responseMessage);
 
   try {
-    const aiResponseReader = await fetchAiResponse(MESSAGES);
+    const aiResponseReader = await fetchAiResponse(message, USER_ID);
     const decoder = new TextDecoder();
     let messageContent = "";
 
@@ -104,8 +115,6 @@ const handleAiResponse = async (messages) => {
       }
     }
 
-    MESSAGES.push({ role: "assistant", content: messageContent });
-
     responseMessage.classList.remove("thinking");
     responseMessage.classList.add("received");
   } catch (error) {
@@ -127,15 +136,14 @@ const onSubmit = async (e) => {
   SUBMIT_BUTTON.textContent = "Sending...";
   CLEAR_BUTTON.classList.remove("hidden");
 
-  handleUserInput();
+  const message = handleUserInput();
 
-  await handleAiResponse(MESSAGES);
+  await handleAiResponse(message);
 
   handleResponseEnd();
 };
 
 const onClear = (e) => {
-  MESSAGES.length = 0;
   CHAT_CONTAINER.innerHTML = "";
   CLEAR_BUTTON.classList.add("hidden");
   startMessage();
