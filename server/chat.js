@@ -22,7 +22,7 @@ const model = new AzureChatOpenAI({
 });
 
 export async function callAssistant(messages) {
-  const result = await model.invoke([
+  return await model.stream([
     SYSTEM_MESSAGE,
     ...messages.map((msg) => {
       if (msg.role === "user") {
@@ -32,6 +32,4 @@ export async function callAssistant(messages) {
       }
     }),
   ]);
-
-  return result.content;
 }

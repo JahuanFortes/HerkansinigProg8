@@ -1,10 +1,13 @@
 const MESSAGES = [];
 
 const DELAY = 5000;
+const RESPONSE_DELAY = 25;
 
 const SUBMIT_BUTTON = document.getElementById("submit");
 const INPUT_FIELD = document.getElementById("inputMessage");
 const CHAT_CONTAINER = document.getElementById("chat");
+
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const appendMessage = (messageElement) => {
   CHAT_CONTAINER.appendChild(messageElement);
@@ -23,8 +26,7 @@ const fetchAiResponse = async (messages) => {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ messages }),
   });
-  const data = await response.json();
-  return data.response;
+  return response.body.getReader();
 };
 
 const sanitizeAndParseMarkdown = (text) => {
@@ -32,11 +34,7 @@ const sanitizeAndParseMarkdown = (text) => {
   return marked.parse(sanitizedText);
 };
 
-SUBMIT_BUTTON.addEventListener("click", async function (e) {
-  e.preventDefault();
-  SUBMIT_BUTTON.disabled = true;
-  SUBMIT_BUTTON.textContent = "Sending...";
-
+const handleUserInput = () => {
   const userMessage = INPUT_FIELD.value.trim();
 
   const sentMessage = createMessageElement(userMessage, "sent");
@@ -45,35 +43,72 @@ SUBMIT_BUTTON.addEventListener("click", async function (e) {
   MESSAGES.push({ role: "user", content: userMessage });
 
   INPUT_FIELD.value = "";
+};
 
-  const thinkingMessage = createMessageElement("Thinking...", "thinking");
-  appendMessage(thinkingMessage);
-
-  try {
-    const responseAI = await fetchAiResponse(MESSAGES);
-    const receivedMessage = createMessageElement(
-      sanitizeAndParseMarkdown(responseAI),
-      "received",
-    );
-
-    MESSAGES.push({ role: "assistant", content: responseAI });
-
-    CHAT_CONTAINER.removeChild(thinkingMessage);
-    appendMessage(receivedMessage);
-  } catch (error) {
-    const errorMessage = createMessageElement(
-      "Error: Unable to get a response from the AI.",
-      "error",
-    );
-
-    CHAT_CONTAINER.removeChild(thinkingMessage);
-    appendMessage(errorMessage);
-  }
-
+const handleResponseEnd = () => {
   SUBMIT_BUTTON.textContent = "Cooldown...";
-
   setTimeout(function () {
     SUBMIT_BUTTON.disabled = false;
     SUBMIT_BUTTON.textContent = "Send";
   }, DELAY);
-});
+};
+
+const handleAiResponse = async (messages) => {
+  const responseMessage = createMessageElement("Thinking...", "thinking");
+  appendMessage(responseMessage);
+
+  try {
+    const aiResponseReader = await fetchAiResponse(MESSAGES);
+    const decoder = new TextDecoder();
+    let messageContent = "";
+
+    while (true) {
+      const { done, value } = await aiResponseReader.read();
+      if (done) break;
+      const chunk = decoder.decode(value);
+      const lines = chunk.split("\n");
+      for (const line of lines) {
+        if (line.startsWith("data: ")) {
+          const data = line.slice(6);
+          if (data === "[DONE]") break;
+          const parsed = JSON.parse(data);
+
+          messageContent += parsed.content;
+
+          responseMessage.innerHTML = sanitizeAndParseMarkdown(messageContent);
+
+          await delay(RESPONSE_DELAY);
+        }
+      }
+    }
+
+    MESSAGES.push({ role: "assistant", content: messageContent });
+
+    responseMessage.classList.remove("thinking");
+    responseMessage.classList.add("received");
+  } catch (error) {
+    CHAT_CONTAINER.removeChild(responseMessage);
+
+    const errorMessage = createMessageElement(
+      "Error: Unable to get a response from the AI.",
+      "error",
+    );
+    appendMessage(errorMessage);
+
+    console.error("Error fetching AI response:", error);
+  }
+};
+
+const onSubmit = async (e) => {
+  e.preventDefault();
+  SUBMIT_BUTTON.disabled = true;
+  SUBMIT_BUTTON.textContent = "Sending...";
+
+  handleUserInput();
+
+  await handleAiResponse(MESSAGES);
+
+  handleResponseEnd();
+};
+
+SUBMIT_BUTTON.addEventListener("click", onSubmit);

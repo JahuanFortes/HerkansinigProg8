@@ -89,6 +89,7 @@ main {
   align-self: flex-start;
   font-style: italic;
   color: #666;
+  border-bottom-left-radius: 0;
 }
 
 .form {
