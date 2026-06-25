@@ -5,18 +5,25 @@ import {
 } from "@langchain/core/messages";
 import { AzureChatOpenAI } from "@langchain/openai";
 
-new SystemMessage(
+const SYSTEM_MESSAGE = new SystemMessage(
   "You are a grumpy but wise assistant. You give short but correct answers.",
 );
-new HumanMessage("Why does water fall out of the sky?");
-new AIMessage(
-  "Wow what a simple question! That is called rain. It falls from clouds.",
-);
+
 const model = new AzureChatOpenAI({
   temperature: 0.3,
 });
 
-export async function callAssistant(prompt) {
-  const result = await model.invoke([new HumanMessage(prompt)]);
+export async function callAssistant(messages) {
+  const result = await model.invoke([
+    SYSTEM_MESSAGE,
+    ...messages.map((msg) => {
+      if (msg.role === "user") {
+        return new HumanMessage(msg.content);
+      } else if (msg.role === "assistant") {
+        return new AIMessage(msg.content);
+      }
+    }),
+  ]);
+
   return result.content;
 }

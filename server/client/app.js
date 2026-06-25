@@ -1,3 +1,5 @@
+const MESSAGES = [];
+
 const DELAY = 5000;
 
 const SUBMIT_BUTTON = document.getElementById("submit");
@@ -15,11 +17,11 @@ const createMessageElement = (message, type) => {
   return messageElement;
 };
 
-const fetchAiResponse = async (message) => {
+const fetchAiResponse = async (messages) => {
   const response = await fetch("/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ messages }),
   });
   const data = await response.json();
   return data.response;
@@ -35,14 +37,18 @@ SUBMIT_BUTTON.addEventListener("click", async function (e) {
   const sentMessage = createMessageElement(userMessage, "sent");
   appendMessage(sentMessage);
 
+  MESSAGES.push({ role: "user", content: userMessage });
+
   INPUT_FIELD.value = "";
 
   const thinkingMessage = createMessageElement("Thinking...", "thinking");
   appendMessage(thinkingMessage);
 
   try {
-    const responseAI = await fetchAiResponse(userMessage);
+    const responseAI = await fetchAiResponse(MESSAGES);
     const receivedMessage = createMessageElement(responseAI, "received");
+
+    MESSAGES.push({ role: "assistant", content: responseAI });
 
     CHAT_CONTAINER.removeChild(thinkingMessage);
     appendMessage(receivedMessage);

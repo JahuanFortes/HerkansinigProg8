@@ -12,8 +12,8 @@ app.get("/", (req, res) => {
 
 //#region POST
 app.post("/chat", async (req, res) => {
-  const { message } = req.body;
-  const response = await callAssistant(message);
+  const { messages } = req.body;
+  const response = await callAssistant(messages);
   res.json({ response });
 });
 //#endregion POST
