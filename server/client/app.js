@@ -1,26 +1,58 @@
-//#region POST
-const submit = document.getElementById("submit");
+const DELAY = 5000;
 
-submit.addEventListener("click", async function (e) {
-  const input = document.getElementById("inputMessage");
-  const message = input.value.trim();
-  const messageSent = (document.getElementById("msgSent").innerHTML =
-    `<div class="msg sent">${message}</div>`);
-  submit.disabeld = false;
-  setTimeout(function () {
-    submit.disabled = true;
-  }, 5000);
-  e.preventDefault();
+const SUBMIT_BUTTON = document.getElementById("submit");
+const INPUT_FIELD = document.getElementById("inputMessage");
+const CHAT_CONTAINER = document.getElementById("chat");
 
-  const responseAI = await fetch("/chat", {
+const appendMessage = (messageElement) => {
+  CHAT_CONTAINER.appendChild(messageElement);
+};
+
+const createMessageElement = (message, type) => {
+  const messageElement = document.createElement("div");
+  messageElement.classList.add("msg", type);
+  messageElement.textContent = message;
+  return messageElement;
+};
+
+const fetchAiResponse = async (message) => {
+  const response = await fetch("/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ message }),
   });
+  const data = await response.json();
+  return data.response;
+};
 
-  const data = await responseAI.json();
-  document.getElementById("msgRecieved").innerHTML =
-    `<div class="msg received">${data.response}<div>`;
+SUBMIT_BUTTON.addEventListener("click", async function (e) {
+  e.preventDefault();
+  SUBMIT_BUTTON.disabled = true;
+  SUBMIT_BUTTON.textContent = "Sending...";
 
-  console.log(data);
+  const userMessage = INPUT_FIELD.value.trim();
+
+  const sentMessage = createMessageElement(userMessage, "sent");
+  appendMessage(sentMessage);
+
+  INPUT_FIELD.value = "";
+
+  try {
+    const responseAI = await fetchAiResponse(userMessage);
+    const receivedMessage = createMessageElement(responseAI, "received");
+
+    appendMessage(receivedMessage);
+  } catch (error) {
+    const errorMessage = createMessageElement(
+      "Error: Unable to get a response from the AI.",
+      "error",
+    );
+
+    appendMessage(errorMessage);
+  }
+
+  setTimeout(function () {
+    SUBMIT_BUTTON.disabled = false;
+    SUBMIT_BUTTON.textContent = "Send";
+  }, DELAY);
 });

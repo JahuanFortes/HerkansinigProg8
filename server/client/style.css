@@ -60,6 +60,13 @@ body {
   align-self: flex-end;
 }
 
+.msg.error {
+  background: #f8d7da;
+  color: #721c24;
+  align-self: center;
+  text-align: center;
+}
+
 .form {
   display: flex;
   padding: 15px;
