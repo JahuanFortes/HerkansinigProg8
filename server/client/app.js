@@ -1,4 +1,4 @@
-let USER_ID = null;
+let USER_ID_KEY = "chat_user_id";
 
 const DELAY = 5000;
 const START_DELAY = 1000;
@@ -18,14 +18,17 @@ const CLEAR_BUTTON = document.getElementById("clearButton");
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const randomString = (length = 16) => {
-  const chars =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let result = "";
-  for (let i = 0; i < length; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
+const getUserId = () => {
+  let userId = localStorage.getItem(USER_ID_KEY);
+  if (!userId) {
+    userId = crypto.randomUUID();
+    localStorage.setItem(USER_ID_KEY, userId);
   }
-  return result;
+  return userId;
+};
+
+const clearUserId = () => {
+  localStorage.removeItem(USER_ID_KEY);
 };
 
 const appendMessage = (messageElement) => {
@@ -39,11 +42,10 @@ const createMessageElement = (message, type) => {
   return messageElement;
 };
 
-const startMessage = () => {
+const initNewChat = () => {
   const startMessage = createMessageElement("Thinking...", "thinking");
   SUBMIT_BUTTON.disabled = true;
   appendMessage(startMessage);
-  USER_ID = randomString(16);
 
   setTimeout(function () {
     startMessage.classList.remove("thinking");
@@ -53,13 +55,39 @@ const startMessage = () => {
   }, START_DELAY);
 };
 
-const fetchAiResponse = async (message, user) => {
+const fetchAiResponse = async (user_id, message) => {
   const response = await fetch("/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message, user }),
+    body: JSON.stringify({ message, user: user_id }),
   });
   return response.body.getReader();
+};
+
+const getChatHistory = async (user_id) => {
+  const response = await fetch(`/chat-history/${user_id}`);
+  if (!response.ok) {
+    const errorMessage = createMessageElement(
+      "Error: Unable to fetch chat history.",
+      "error",
+    );
+    appendMessage(errorMessage);
+  }
+
+  return response.json();
+};
+
+const clearChatHistory = async (user_id) => {
+  const response = await fetch(`/chat-history/${user_id}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    const errorMessage = createMessageElement(
+      "Error: Unable to clear chat history.",
+      "error",
+    );
+    appendMessage(errorMessage);
+  }
 };
 
 const sanitizeAndParseMarkdown = (text) => {
@@ -79,6 +107,7 @@ const handleUserInput = () => {
 };
 
 const handleResponseEnd = () => {
+  SUBMIT_BUTTON.disabled = true;
   SUBMIT_BUTTON.textContent = "Cooldown...";
   setTimeout(function () {
     SUBMIT_BUTTON.disabled = false;
@@ -86,12 +115,12 @@ const handleResponseEnd = () => {
   }, DELAY);
 };
 
-const handleAiResponse = async (message) => {
+const handleAiResponse = async (user_id, message) => {
   const responseMessage = createMessageElement("Thinking...", "thinking");
   appendMessage(responseMessage);
 
   try {
-    const aiResponseReader = await fetchAiResponse(message, USER_ID);
+    const aiResponseReader = await fetchAiResponse(user_id, message);
     const decoder = new TextDecoder();
     let messageContent = "";
 
@@ -130,15 +159,35 @@ const handleAiResponse = async (message) => {
   }
 };
 
+const renderChatHistory = (chatHistory) => {
+  const startMessage = createMessageElement(
+    sanitizeAndParseMarkdown(START_MESSAGE),
+    "received",
+  );
+  appendMessage(startMessage);
+
+  for (const msg of chatHistory) {
+    const type = msg.role === "user" ? "sent" : "received";
+    const messageElement = createMessageElement(
+      sanitizeAndParseMarkdown(msg.content),
+      type,
+    );
+    appendMessage(messageElement);
+  }
+
+  CLEAR_BUTTON.classList.remove("hidden");
+};
+
 const onSubmit = async (e) => {
   e.preventDefault();
   SUBMIT_BUTTON.disabled = true;
   SUBMIT_BUTTON.textContent = "Sending...";
   CLEAR_BUTTON.classList.remove("hidden");
 
+  const user_id = getUserId();
   const message = handleUserInput();
 
-  await handleAiResponse(message);
+  await handleAiResponse(user_id, message);
 
   handleResponseEnd();
 };
@@ -146,13 +195,28 @@ const onSubmit = async (e) => {
 const onClear = (e) => {
   CHAT_CONTAINER.innerHTML = "";
   CLEAR_BUTTON.classList.add("hidden");
-  startMessage();
+
+  const user_id = getUserId();
+  clearChatHistory();
+  clearUserId();
+
+  initNewChat();
+};
+
+const onLoad = async () => {
+  const user_id = getUserId();
+
+  const chatHistory = await getChatHistory(user_id);
+  if (chatHistory && chatHistory.length > 0) {
+    renderChatHistory(chatHistory);
+    return;
+  }
+
+  initNewChat();
 };
 
 SUBMIT_BUTTON.addEventListener("click", onSubmit);
 
 CLEAR_BUTTON.addEventListener("click", onClear);
 
-window.addEventListener("load", () => {
-  startMessage();
-});
+window.addEventListener("load", onLoad);

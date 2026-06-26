@@ -70,8 +70,6 @@ const model = new AzureChatOpenAI({
 const userChatHistory = new Map();
 
 export async function callAssistant(message, user) {
-  console.log(userChatHistory);
-
   if (!userChatHistory.has(user)) {
     userChatHistory.set(user, []);
   }
@@ -100,4 +98,12 @@ export async function updateChatHistory(user, assistantMessage) {
   const messages = userChatHistory.get(user);
   messages.push({ role: "assistant", content: assistantMessage });
   userChatHistory.set(user, messages);
+}
+
+export function getChatHistory(user) {
+  return userChatHistory.get(user) || [];
+}
+
+export function clearChatHistory(user) {
+  userChatHistory.delete(user);
 }

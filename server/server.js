@@ -1,5 +1,10 @@
 import express from "express";
-import { callAssistant, updateChatHistory } from "./chat.js";
+import {
+  callAssistant,
+  clearChatHistory,
+  getChatHistory,
+  updateChatHistory,
+} from "./chat.js";
 
 const app = express();
 app.use(express.json());
@@ -8,6 +13,12 @@ app.use(express.static("client"));
 //#region GET
 app.get("/", (req, res) => {
   res.sendFile("client/index.html", { root: "." });
+});
+
+app.get("/chat-history/:user", (req, res) => {
+  const user = req.params.user;
+  const chatHistory = getChatHistory(user);
+  res.json(chatHistory);
 });
 //#endregion GET
 
@@ -36,5 +47,13 @@ app.post("/chat", async (req, res) => {
   }
 });
 //#endregion POST
+
+//#region DELETE
+app.delete("/chat-history/:user", (req, res) => {
+  const user = req.params.user;
+  clearChatHistory(user);
+  res.status(200).json({ message: "Chat history cleared." });
+});
+//#endregion DELETE
 
 app.listen(3000, () => console.log(`Server on http://localhost:3000/`));
