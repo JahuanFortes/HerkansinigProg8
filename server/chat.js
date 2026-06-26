@@ -1,6 +1,5 @@
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
 import { AzureChatOpenAI } from "@langchain/openai";
-
 import { SYSTEM_PROMPT } from "./system_prompt.js";
 
 // model setup met temperature voor goede balans
