@@ -8,7 +8,7 @@
   --text-color-light: #666;
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   --thinking-shadow: rgba(0, 119, 26, 0.233);
-  --received-avatar: url("./persona.jpg");
+  --received-avatar: url("../assets/persona.jpg");
   --border-color: #ccc;
 }
 
