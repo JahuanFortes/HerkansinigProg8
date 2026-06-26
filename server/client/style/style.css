@@ -1,15 +1,20 @@
+@import url("https://fonts.googleapis.com/css2?family=Michroma&family=Science+Gothic:wght@100..900&display=swap");
+
 :root {
-  --primary-color: #1f8a78;
-  --secondary-color: #cdebb0;
-  --received-msg-color: #f0f0f0;
-  --sent-msg-color: #cdebb0;
-  --background-color: #e5e5e5;
-  --text-color: #333;
-  --text-color-light: #666;
-  --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --thinking-shadow: rgba(0, 119, 26, 0.233);
-  --received-avatar: url("../assets/persona.jpg");
-  --border-color: #ccc;
+  --primary-color: #00c3ff;
+  --secondary-color: #ff00c8;
+  --received-msg-color: #ffffff;
+  --sent-msg-color: #00f5ff;
+  --background-color: #0a0a0f;
+  --text-color: #f5f5f5;
+  --text-color-light: #9ca3af;
+  --shadow: 0 2px 12px rgba(0, 245, 255, 0.25);
+  --thinking-shadow: rgba(255, 60, 0, 0.35);
+  --received-shadow: rgba(0, 238, 255, 0.35);
+  --sent-shadow: rgba(255, 0, 200, 0.35);
+  --border-color: #2d2d44;
+  --received-avatar: url("../assets/persona.png");
+  --background-image: url("../assets/background.webp");
 }
 
 *,
@@ -32,7 +37,12 @@ main {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: var(--background-color);
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+    var(--background-image);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
   font-family: Arial;
 }
 
@@ -48,6 +58,7 @@ main {
   padding: 20px;
   font-weight: bold;
   font-size: 18px;
+  font-family: "Science Gothic", sans-serif;
 }
 
 .header .container {
@@ -61,8 +72,12 @@ main {
   color: white;
   border: none;
   padding: 8px 16px;
-  border-radius: 4px;
   cursor: pointer;
+  font-family: "Science Gothic", sans-serif;
+}
+
+.clear-button:hover {
+  background: #d32f2f;
 }
 
 .title {
@@ -81,16 +96,17 @@ main {
 }
 
 .msg {
-  max-width: min(400px, calc(100% - 40px));
+  max-width: calc(100% - 40px);
   padding: 10px 14px;
   border-radius: 12px;
   overflow-wrap: anywhere;
+  font-family: "Michroma", sans-serif;
 }
 
 .msg.received,
 .msg.thinking {
   align-self: flex-start;
-  max-width: min(400px, calc(100% - 84px));
+  max-width: calc(100% - 84px);
   margin-left: 44px;
   border-bottom-left-radius: 0;
   position: relative;
@@ -99,6 +115,8 @@ main {
 .msg.received {
   background: var(--received-msg-color);
   box-shadow: var(--shadow);
+  --pulse-shadow: var(--received-shadow);
+  animation: pulse-no-opacity 2s ease-in-out infinite;
 }
 
 .msg.sent {
@@ -106,6 +124,8 @@ main {
   align-self: flex-end;
   border-bottom-right-radius: 0;
   box-shadow: var(--shadow);
+  --pulse-shadow: var(--sent-shadow);
+  animation: pulse-no-opacity 2s ease-in-out infinite;
 }
 
 .msg.error {
@@ -134,7 +154,8 @@ main {
   background: var(--received-msg-color);
   font-style: italic;
   color: var(--text-color-light);
-  animation: input-pulse 2s ease-in-out infinite;
+  --pulse-shadow: var(--thinking-shadow);
+  animation: pulse 2s ease-in-out infinite;
 }
 
 .msg .msg-tokens {
@@ -149,7 +170,7 @@ main {
   display: flex;
   padding: 15px;
   border-top: 1px solid var(--border-color);
-  background: #eee;
+  background: var(--background-color);
 }
 
 .form .container {
@@ -162,17 +183,17 @@ main {
   flex: 1;
   min-width: 0;
   padding: 12px;
-  border-radius: 25px;
   border: 1px solid var(--border-color);
+  font-family: "Science Gothic", sans-serif;
 }
 
 .form .submit-button {
   margin-left: 10px;
   padding: 12px 20px;
-  border-radius: 25px;
   border: none;
   background: var(--primary-color);
   color: white;
+  font-family: "Science Gothic", sans-serif;
 }
 
 .form .submit-button:disabled {
@@ -184,21 +205,37 @@ main {
   display: none;
 }
 
-@keyframes input-pulse {
+@keyframes pulse {
   0% {
-    box-shadow: 0 0 0 0 var(--thinking-shadow);
+    box-shadow: 0 0 0 0 var(--pulse-shadow);
     opacity: 0.7;
   }
 
   50% {
     box-shadow:
-      0 0 0 4px var(--thinking-shadow),
-      0 0 20px var(--thinking-shadow);
+      0 0 0 4px var(--pulse-shadow),
+      0 0 20px var(--pulse-shadow);
     opacity: 1;
   }
 
   100% {
-    box-shadow: 0 0 0 0 var(--thinking-shadow);
+    box-shadow: 0 0 0 0 var(--pulse-shadow);
     opacity: 0.7;
+  }
+}
+
+@keyframes pulse-no-opacity {
+  0% {
+    box-shadow: 0 0 0 0 var(--pulse-shadow);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 4px var(--pulse-shadow),
+      0 0 20px var(--pulse-shadow);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 var(--pulse-shadow);
   }
 }
