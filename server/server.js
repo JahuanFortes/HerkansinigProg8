@@ -32,15 +32,21 @@ app.post("/chat", async (req, res) => {
 
   try {
     let assistantMessage = "";
+    let tokensUsed = 0;
+
     for await (const chunk of await callAssistant(message, user)) {
-      res.write(`data: ${JSON.stringify({ content: chunk.content })}\n\n`);
+      res.write(
+        `data: ${JSON.stringify({ content: chunk.content, tokens: chunk?.usage_metadata?.total_tokens })}\n\n`,
+      );
+
       assistantMessage += chunk.content;
+      tokensUsed = chunk?.usage_metadata?.total_tokens || tokensUsed;
     }
 
     res.write("data: [DONE]\n\n");
     res.end();
 
-    await updateChatHistory(user, assistantMessage);
+    await updateChatHistory(user, assistantMessage, tokensUsed);
   } catch (error) {
     res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`);
     res.end();

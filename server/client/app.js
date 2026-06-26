@@ -42,6 +42,18 @@ const createMessageElement = (message, type) => {
   return messageElement;
 };
 
+const createReceivedMessageContent = (content, tokens) => {
+  const messageContent = document.createElement("div");
+  messageContent.classList.add("msg-content");
+  messageContent.innerHTML = content;
+
+  const tokensElement = document.createElement("div");
+  tokensElement.classList.add("msg-tokens");
+  tokensElement.textContent = `Tokens used: ${tokens}`;
+
+  return messageContent.outerHTML + tokensElement.outerHTML;
+};
+
 const initNewChat = () => {
   const startMessage = createMessageElement("Thinking...", "thinking");
   SUBMIT_BUTTON.disabled = true;
@@ -123,6 +135,7 @@ const handleAiResponse = async (user_id, message) => {
     const aiResponseReader = await fetchAiResponse(user_id, message);
     const decoder = new TextDecoder();
     let messageContent = "";
+    let tokensUsed = 0;
 
     while (true) {
       const { done, value } = await aiResponseReader.read();
@@ -136,6 +149,7 @@ const handleAiResponse = async (user_id, message) => {
           const parsed = JSON.parse(data);
 
           messageContent += parsed.content;
+          tokensUsed = parsed?.tokens;
 
           responseMessage.innerHTML = sanitizeAndParseMarkdown(messageContent);
 
@@ -143,6 +157,11 @@ const handleAiResponse = async (user_id, message) => {
         }
       }
     }
+
+    responseMessage.innerHTML = createReceivedMessageContent(
+      sanitizeAndParseMarkdown(messageContent),
+      tokensUsed,
+    );
 
     responseMessage.classList.remove("thinking");
     responseMessage.classList.add("received");
@@ -168,10 +187,17 @@ const renderChatHistory = (chatHistory) => {
 
   for (const msg of chatHistory) {
     const type = msg.role === "user" ? "sent" : "received";
-    const messageElement = createMessageElement(
-      sanitizeAndParseMarkdown(msg.content),
-      type,
-    );
+    const content = sanitizeAndParseMarkdown(msg.content);
+
+    const messageElement = createMessageElement(content, type);
+
+    if (msg.role === "assistant" && msg.tokens) {
+      messageElement.innerHTML = createReceivedMessageContent(
+        content,
+        msg.tokens,
+      );
+    }
+
     appendMessage(messageElement);
   }
 

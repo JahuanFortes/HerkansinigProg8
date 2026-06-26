@@ -90,13 +90,17 @@ export async function callAssistant(message, user) {
   ]);
 }
 
-export async function updateChatHistory(user, assistantMessage) {
+export async function updateChatHistory(user, assistantMessage, tokensUsed) {
   if (!userChatHistory.has(user)) {
     userChatHistory.set(user, []);
   }
 
   const messages = userChatHistory.get(user);
-  messages.push({ role: "assistant", content: assistantMessage });
+  messages.push({
+    role: "assistant",
+    content: assistantMessage,
+    tokens: tokensUsed,
+  });
   userChatHistory.set(user, messages);
 }
 

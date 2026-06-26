@@ -5,9 +5,11 @@
   --sent-msg-color: #cdebb0;
   --background-color: #e5e5e5;
   --text-color: #333;
+  --text-color-light: #666;
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   --thinking-shadow: rgba(0, 119, 26, 0.233);
   --received-avatar: url("./persona.jpg");
+  --border-color: #ccc;
 }
 
 *,
@@ -131,14 +133,22 @@ main {
 .msg.thinking {
   background: var(--received-msg-color);
   font-style: italic;
-  color: #666;
+  color: var(--text-color-light);
   animation: input-pulse 2s ease-in-out infinite;
+}
+
+.msg .msg-tokens {
+  display: block;
+  font-size: 12px;
+  color: var(--text-color-light);
+  margin-top: 5px;
+  font-family: monospace;
 }
 
 .form {
   display: flex;
   padding: 15px;
-  border-top: 1px solid #ccc;
+  border-top: 1px solid var(--border-color);
   background: #eee;
 }
 
@@ -153,7 +163,7 @@ main {
   min-width: 0;
   padding: 12px;
   border-radius: 25px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
 }
 
 .form .submit-button {
