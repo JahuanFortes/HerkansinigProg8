@@ -1,6 +1,6 @@
-let USER_ID_KEY = "chat_user_id";
-
-const DELAY = 5000;
+// Constanten
+const USER_ID_KEY = "chat_user_id";
+const COOLDOWN_DELAY = 5000;
 const START_DELAY = 1000;
 const RESPONSE_DELAY = 25;
 const START_MESSAGE = `🌐 [System Online] — Hello, I'm your neon-lit companion in this digital expanse.  
@@ -9,12 +9,18 @@ Here to illuminate your thoughts, navigate your questions, and spark new insight
 
 What signal shall we explore together today? 🚀✨`;
 
+// Dom elementen constanten
 const SUBMIT_BUTTON = document.getElementById("submit");
 const INPUT_FIELD = document.getElementById("inputMessage");
 const CHAT_CONTAINER = document.getElementById("chat");
 const CLEAR_BUTTON = document.getElementById("clearButton");
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const sanitizeAndParseMarkdown = (text) => {
+  const sanitizedText = DOMPurify.sanitize(text);
+  return marked.parse(sanitizedText);
+};
 
 const getUserId = () => {
   let userId = localStorage.getItem(USER_ID_KEY);
@@ -33,6 +39,7 @@ const appendMessage = (messageElement) => {
   CHAT_CONTAINER.appendChild(messageElement);
 };
 
+// maakt message elementen met volgende types: sent, received, thinking, error
 const createMessageElement = (message, type) => {
   const messageElement = document.createElement("div");
   messageElement.classList.add("msg", type);
@@ -57,21 +64,12 @@ const initNewChat = () => {
   SUBMIT_BUTTON.disabled = true;
   appendMessage(startMessage);
 
-  setTimeout(function () {
+  setTimeout(() => {
     startMessage.classList.remove("thinking");
     startMessage.classList.add("received");
     startMessage.innerHTML = sanitizeAndParseMarkdown(START_MESSAGE);
     SUBMIT_BUTTON.disabled = false;
   }, START_DELAY);
-};
-
-const fetchAiResponse = async (user_id, message) => {
-  const response = await fetch("/chat", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message, user: user_id }),
-  });
-  return response.body.getReader();
 };
 
 const getChatHistory = async (user_id) => {
@@ -100,11 +98,6 @@ const clearChatHistory = async (user_id) => {
   }
 };
 
-const sanitizeAndParseMarkdown = (text) => {
-  const sanitizedText = DOMPurify.sanitize(text);
-  return marked.parse(sanitizedText);
-};
-
 const handleUserInput = () => {
   const userMessage = INPUT_FIELD.value.trim();
 
@@ -116,13 +109,14 @@ const handleUserInput = () => {
   return userMessage;
 };
 
-const handleResponseEnd = () => {
-  SUBMIT_BUTTON.disabled = true;
-  SUBMIT_BUTTON.textContent = "Cooldown...";
-  setTimeout(function () {
-    SUBMIT_BUTTON.disabled = false;
-    SUBMIT_BUTTON.textContent = "Send";
-  }, DELAY);
+const fetchAiResponse = async (user_id, message) => {
+  const response = await fetch("/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message, user: user_id }),
+  });
+  // reader maken voor het streamen van de response
+  return response.body.getReader();
 };
 
 const handleAiResponse = async (user_id, message) => {
@@ -130,20 +124,33 @@ const handleAiResponse = async (user_id, message) => {
   appendMessage(responseMessage);
 
   try {
+    // code uit slides
     const aiResponseReader = await fetchAiResponse(user_id, message);
+
+    // TextDecoder gebruiken om de stream te decoderen
     const decoder = new TextDecoder();
+
+    // variabelen zetten omdat de stream per stukje data verzend
     let messageContent = "";
     let tokensUsed = 0;
 
     while (true) {
       const { done, value } = await aiResponseReader.read();
+
       if (done) break;
+
+      // bytes naar string decoderen
       const chunk = decoder.decode(value);
+
       const lines = chunk.split("\n");
+
       for (const line of lines) {
         if (line.startsWith("data: ")) {
+          // de data van de line halen
           const data = line.slice(6);
+
           if (data === "[DONE]") break;
+
           const parsed = JSON.parse(data);
 
           messageContent += parsed.content;
@@ -156,14 +163,17 @@ const handleAiResponse = async (user_id, message) => {
       }
     }
 
+    // laatse update van de message met tokens used
     responseMessage.innerHTML = createReceivedMessageContent(
       sanitizeAndParseMarkdown(messageContent),
       tokensUsed,
     );
 
+    // message class aanpassen van thinking naar received
     responseMessage.classList.remove("thinking");
     responseMessage.classList.add("received");
   } catch (error) {
+    // verwijder de incomplete thinking message en laat een error message zien
     CHAT_CONTAINER.removeChild(responseMessage);
 
     const errorMessage = createMessageElement(
@@ -174,6 +184,15 @@ const handleAiResponse = async (user_id, message) => {
 
     console.error("Error fetching AI response:", error);
   }
+};
+
+const handleResponseEnd = () => {
+  SUBMIT_BUTTON.disabled = true;
+  SUBMIT_BUTTON.textContent = "Cooldown...";
+  setTimeout(function () {
+    SUBMIT_BUTTON.disabled = false;
+    SUBMIT_BUTTON.textContent = "Send";
+  }, COOLDOWN_DELAY);
 };
 
 const renderChatHistory = (chatHistory) => {
@@ -221,7 +240,7 @@ const onClear = (e) => {
   CLEAR_BUTTON.classList.add("hidden");
 
   const user_id = getUserId();
-  clearChatHistory();
+  clearChatHistory(user_id);
   clearUserId();
 
   initNewChat();
@@ -239,6 +258,7 @@ const onLoad = async () => {
   initNewChat();
 };
 
+// Event listeners
 SUBMIT_BUTTON.addEventListener("click", onSubmit);
 
 CLEAR_BUTTON.addEventListener("click", onClear);
