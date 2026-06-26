@@ -3,13 +3,11 @@ let USER_ID_KEY = "chat_user_id";
 const DELAY = 5000;
 const START_DELAY = 1000;
 const RESPONSE_DELAY = 25;
-const START_MESSAGE = `Hey you.
+const START_MESSAGE = `🌐 [System Online] — Hello, I'm your neon-lit companion in this digital expanse.  
 
-I'm here. So, what's going on in your head today?
+Here to illuminate your thoughts, navigate your questions, and spark new insights.
 
-You can talk to me about anything—plans, problems, random thoughts, or even stuff you don't fully understand yet. If it helps, I might ask you a few questions too. Don't worry, I'm not grilling you—just trying to actually understand you properly.
-
-So go on. What are we dealing with?`;
+What signal shall we explore together today? 🚀✨`;
 
 const SUBMIT_BUTTON = document.getElementById("submit");
 const INPUT_FIELD = document.getElementById("inputMessage");
