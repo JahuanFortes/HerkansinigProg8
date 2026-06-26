@@ -31,37 +31,18 @@ app.get("/chat-history/:user", (req, res) => {
 app.post("/chat", async (req, res) => {
   const { message, user } = req.body;
 
-  // Handlers voor het streamen van het ai antwoord
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache");
-  res.setHeader("Connection", "keep-alive");
-
   try {
-    // variabelen zetten omdat de stream per stukje data verzend
-    let assistantMessage = "";
-    let tokensUsed = 0;
+    const response = await callAssistant(user, message);
 
-    for await (const chunk of await callAssistant(user, message)) {
-      res.write(
-        `data: ${JSON.stringify({ content: chunk.content, tokens: chunk?.usage_metadata?.total_tokens })}\n\n`,
-      );
+    let assistantMessage = response.content;
+    let tokensUsed = response?.usage_metadata?.total_tokens || 0;
 
-      // elke chunk toevoegen aan de message
-      assistantMessage += chunk.content;
-
-      // tokens data komt laatste chunk binnen
-      tokensUsed = chunk?.usage_metadata?.total_tokens || tokensUsed;
-    }
-
-    // einde van de stream
-    res.write("data: [DONE]\n\n");
-    res.end();
+    res.json({ message: assistantMessage, tokens: tokensUsed });
 
     // chat history updaten met het volledige assistant message en tokens used
     await updateChatHistory(user, assistantMessage, tokensUsed);
   } catch (error) {
-    res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`);
-    res.end();
+    res.status(500).json({ error: "Error processing the request." });
   }
 });
 //#endregion POST

@@ -25,7 +25,7 @@ export async function callAssistant(user, message) {
   userChatHistory.set(user, messages);
 
   // model callen met system prompt en de chat history van de user
-  return await model.stream([
+  return await model.invoke([
     SYSTEM_PROMPT,
     ...messages.map((msg) => {
       if (msg.role === "user") {

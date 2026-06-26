@@ -116,7 +116,7 @@ const fetchAiResponse = async (user_id, message) => {
     body: JSON.stringify({ message, user: user_id }),
   });
   // reader maken voor het streamen van de response
-  return response.body.getReader();
+  return await response.json();
 };
 
 const handleAiResponse = async (user_id, message) => {
@@ -124,49 +124,11 @@ const handleAiResponse = async (user_id, message) => {
   appendMessage(responseMessage);
 
   try {
-    // code uit slides
-    const aiResponseReader = await fetchAiResponse(user_id, message);
+    const aiResponseBody = await fetchAiResponse(user_id, message);
 
-    // TextDecoder gebruiken om de stream te decoderen
-    const decoder = new TextDecoder();
-
-    // variabelen zetten omdat de stream per stukje data verzend
-    let messageContent = "";
-    let tokensUsed = 0;
-
-    while (true) {
-      const { done, value } = await aiResponseReader.read();
-
-      if (done) break;
-
-      // bytes naar string decoderen
-      const chunk = decoder.decode(value);
-
-      const lines = chunk.split("\n");
-
-      for (const line of lines) {
-        if (line.startsWith("data: ")) {
-          // de data van de line halen
-          const data = line.slice(6);
-
-          if (data === "[DONE]") break;
-
-          const parsed = JSON.parse(data);
-
-          messageContent += parsed.content;
-          tokensUsed = parsed?.tokens;
-
-          responseMessage.innerHTML = sanitizeAndParseMarkdown(messageContent);
-
-          await delay(RESPONSE_DELAY);
-        }
-      }
-    }
-
-    // laatse update van de message met tokens used
     responseMessage.innerHTML = createReceivedMessageContent(
-      sanitizeAndParseMarkdown(messageContent),
-      tokensUsed,
+      sanitizeAndParseMarkdown(aiResponseBody.message),
+      aiResponseBody?.tokens || 0,
     );
 
     // message class aanpassen van thinking naar received
